@@ -219,6 +219,7 @@
                                 for (boundElCount = 0; boundElCount < elementBinding.boundEls.length; boundElCount++) {
                                     boundEl = elementBinding.boundEls[boundElCount];
 
+<<<<<<< HEAD
                                     if (boundEl === findEl) {
                                         elBindings.push(elementBinding);
                                     }
@@ -228,6 +229,51 @@
 
                         return elBindings;
                     },
+=======
+                    if(!boundEl._isSetting){
+                        convertedValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, value);
+                        this._setEl($(boundEl), elementBinding, convertedValue);
+                    }
+                }
+            }
+        },
+
+        _setEl: function (el, elementBinding, convertedValue) {
+            if (elementBinding.elAttribute) {
+                this._setElAttribute(el, elementBinding, convertedValue);
+            }
+            else {
+                this._setElValue(el, convertedValue);
+            }
+        },
+
+        _setElAttribute:function (el, elementBinding, convertedValue) {
+            switch (elementBinding.elAttribute) {
+                case 'html':
+                    el.html(convertedValue);
+                    break;
+                case 'text':
+                    el.text(convertedValue);
+                    break;
+                case 'enabled':
+                    el.attr('disabled', !convertedValue);
+                    break;
+                case 'displayed':
+                    el[convertedValue ? 'show' : 'hide']();
+                    break;
+                case 'hidden':
+                    el[convertedValue ? 'hide' : 'show']();
+                    break;
+                case 'css':
+                    el.css(elementBinding.cssAttribute, convertedValue);
+                    break;
+                case 'class':
+                    var previousValue = this._model.previous(elementBinding.attributeBinding.attributeName);
+                    if(!_.isUndefined(previousValue)){
+                        previousValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, previousValue);
+                        el.removeClass(previousValue);
+                    }
+>>>>>>> 349c721d388a9ecc7dfcc91961f0501ae4cb4742
 
                     _onModelChange:function () {
                         var changedAttribute, attributeBinding;
@@ -248,11 +294,11 @@
                         for (elementBindingCount = 0; elementBindingCount < attributeBinding.elementBindings.length; elementBindingCount++) {
                             elementBinding = attributeBinding.elementBindings[elementBindingCount];
 
-                            for (boundElCount = 0; boundElCount < elementBinding.boundEls.length; boundElCount++) {
-                                boundEl = elementBinding.boundEls[boundElCount];
+                            if(!elementBinding.isSetting){
+                                var convertedValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, value);
 
-                                if(!boundEl._isSetting){
-                                    convertedValue = this._getConvertedValue(Backbone.ModelBinder.Constants.ModelToView, elementBinding, value);
+                                for (boundElCount = 0; boundElCount < elementBinding.boundEls.length; boundElCount++) {
+                                    boundEl = elementBinding.boundEls[boundElCount];
                                     this._setEl($(boundEl), elementBinding, convertedValue);
                                 }
                             }
@@ -327,7 +373,7 @@
                         else if(el.is('input') || el.is('select') || el.is('textarea')){
                             el.val(convertedValue);
                         }
-                        else if(el.attr('contenteditable')){
+                        else if(el.prop('contenteditable')){
                             el.html(convertedValue);
                         }
                         else {
@@ -356,7 +402,7 @@
                         if (el.attr('type') === 'checkbox') {
                             return el.prop('checked') ? true : false;
                         }
-                        else if (el.attr('contenteditable')) {
+                        else if (el.prop('contenteditable')) {
                             return el.html();
                         }
                         else {
